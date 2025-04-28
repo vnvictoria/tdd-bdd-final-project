@@ -43,15 +43,17 @@ def step_impl(context):
 @then('I should see "{message}" in the title')
 def step_impl(context, message):
     """ Check the document title for a message """
-    assert(message in context.driver.title)
+    assert message in context.driver.title
 
 @then('I should not see "{text_string}"')
 def step_impl(context, text_string):
+    """ Check the body for text """
     element = context.driver.find_element(By.TAG_NAME, 'body')
-    assert(text_string not in element.text)
+    assert text_string not in element.text
 
 @when('I set the "{element_name}" to "{text_string}"')
 def step_impl(context, element_name, text_string):
+    """ Set the value of an input field """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = context.driver.find_element(By.ID, element_id)
     element.clear()
@@ -59,27 +61,31 @@ def step_impl(context, element_name, text_string):
 
 @when('I select "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
+    """ Select a value from a dropdown """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = Select(context.driver.find_element(By.ID, element_id))
     element.select_by_visible_text(text)
 
 @then('I should see "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
+    """ Check the selected value in a dropdown """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = Select(context.driver.find_element(By.ID, element_id))
-    assert(element.first_selected_option.text == text)
+    assert element.first_selected_option.text == text
 
 @then('the "{element_name}" field should be empty')
 def step_impl(context, element_name):
+    """ Check if an input field is empty """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = context.driver.find_element(By.ID, element_id)
-    assert(element.get_attribute('value') == u'')
+    assert element.get_attribute('value') == ''
 
 ##################################################################
 # These two function simulate copy and paste
 ##################################################################
 @when('I copy the "{element_name}" field')
 def step_impl(context, element_name):
+    """ Copy the value of an input field to the clipboard """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.presence_of_element_located((By.ID, element_id))
@@ -89,6 +95,7 @@ def step_impl(context, element_name):
 
 @when('I paste the "{element_name}" field')
 def step_impl(context, element_name):
+    """ Paste the value from the clipboard into an input field """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.presence_of_element_located((By.ID, element_id))
@@ -98,13 +105,11 @@ def step_impl(context, element_name):
 
 ##################################################################
 # This code works because of the following naming convention:
-# The buttons have an id in the html hat is the button text
+# The buttons have an id in the html that is the button text
 # in lowercase followed by '-btn' so the Clean button has an id of
 # id='clear-btn'. That allows us to lowercase the name and add '-btn'
 # to get the element id of any button
 ##################################################################
-
-## UPDATE CODE HERE ##
 
 ##################################################################
 # This code works because of the following naming convention:
@@ -112,9 +117,9 @@ def step_impl(context, element_name):
 # prefixed by ID_PREFIX so the Name field has an id='pet_name'
 # We can then lowercase the name and prefix with pet_ to get the id
 ##################################################################
-
 @then('I should see "{text_string}" in the "{element_name}" field')
 def step_impl(context, text_string, element_name):
+    """ Check the value of an input field """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element_value(
@@ -122,13 +127,47 @@ def step_impl(context, text_string, element_name):
             text_string
         )
     )
-    assert(found)
+    assert found
 
 @when('I change "{element_name}" to "{text_string}"')
 def step_impl(context, element_name, text_string):
+    """ Change the value of an input field """
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
     element = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.presence_of_element_located((By.ID, element_id))
     )
     element.clear()
     element.send_keys(text_string)
+@when('I press the "{button}" button')
+def step_impl(context, button):
+    """ Press a button """
+    button_id = button.lower() + '-btn'
+    element = context.driver.find_element(By.ID, button_id).click
+
+@then('I should see "{name}" in the results')
+def step_impl(context, name):
+    """ Check if text is present in the search results """
+    found = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'search_results'),
+            name
+        )
+    )
+    assert found
+
+@then('I should not see "{name}" in the results')
+def step_impl(context, name):
+    """ Check if text is NOT present in the search results """
+    element = context.driver.find_element(By.ID, 'search_results') #changed find_element_by_id to find_element
+    assert name not in element.text
+
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    """ Check if a message is displayed """
+    found = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'flash_message'),
+            message
+        )
+    )
+    assert found
